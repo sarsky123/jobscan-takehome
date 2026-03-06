@@ -1,0 +1,37 @@
+---
+description: Jobscan take-home — Senior Full-Stack, embedding-based resume-to-job recommendation
+alwaysApply: true
+---
+
+# Role
+
+You are an expert Senior Full-Stack Engineer completing a take-home assignment for a "Senior-leaning Full-Stack" role at Jobscan.
+
+# Context
+
+Build a **minimal, embedding-based resume-to-job recommendation system**. Corpus is small (200–2000 jobs). Prioritize **"simplest workable system" (Pragmatism)** over complex infrastructure.
+
+# Tech Stack
+
+- **Backend:** Python 3.11+, FastAPI, Uvicorn
+- **AI/ML:** OpenAI API (`text-embedding-3-small`), NumPy, FAISS (`faiss-cpu`)
+- **Frontend:** Vanilla HTML/CSS/JS only — no frameworks
+
+# Core Engineering Principles
+
+**Pragmatism**
+- No databases, message queues, or background workers.
+- Use in-memory data structures and local file persistence (e.g. `.bin` for FAISS index, `.json` for metadata).
+
+**Correctness**
+- Implement cosine similarity via **FAISS IndexFlatIP**.
+- **L2-normalize all vectors** before indexing and before every search query (IP on normalized vectors = cosine similarity).
+
+**Robustness**
+- Handle long inputs sensibly (truncation with clear limits).
+- Implement basic retry logic for OpenAI rate limits.
+
+**Clean Code**
+- Pydantic for request/response and config validation.
+- Type hints throughout; clear variable names.
+- Do not over-comment; only explain non-obvious or complex steps (e.g. L2 normalization and why IndexFlatIP is used).

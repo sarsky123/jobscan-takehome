@@ -1,0 +1,12 @@
+---
+description: Core coding standards for the Jobscan project
+alwaysApply: true
+---
+
+# Core Standards
+
+- Prefer clear, readable code over clever tricks.
+- Use meaningful names for variables, functions, and files.
+- Handle errors explicitly; avoid silent catches or ignored failures.
+- Keep functions and files focused; split when they grow too large.
+- Add brief comments for non-obvious logic; avoid redundant comments.

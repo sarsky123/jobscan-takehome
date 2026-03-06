@@ -1,0 +1,20 @@
+---
+description: Ingestion scaling strategy — what breaks at scale and how to fix it
+globs: ingestion/**/*
+alwaysApply: false
+---
+
+# Ingestion Scaling Context
+
+When extending or refactoring the ingestion service, keep this scaling strategy in mind.
+
+## What breaks first
+
+- **Ingestion:** A single script fails on network errors/rate limits. Resuming from a 500k-record failure is impossible without checkpointing.
+- **Memory & Compute:** In-memory FAISS (IndexFlatIP) scales at O(N). Millions of 1536-d vectors exhaust RAM and spike query latency.
+
+## Concrete strategy for scale
+
+1. **Decoupled ingestion pipeline:** Move from synchronous script to event-driven. Raw jobs land in S3 → publish to Kafka/SQS → consumed by a pool of Embedding Workers. Workers handle rate-limiting, batching, and fault tolerance via message retries.
+2. **Dedicated vector database:** Replace local FAISS with a managed Vector DB (Pinecone, Milvus). Use ANN (e.g. HNSW) to reduce search from O(N) to O(log N).
+3. **Database segregation:** Store only vectors and Job IDs in the Vector DB. Store full job descriptions in a Document DB (DynamoDB/MongoDB) for storage cost and keyword filtering.

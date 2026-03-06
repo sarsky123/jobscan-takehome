@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+.venv-ingestion/
+env/
+.env.local
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Generated ingestion outputs (storage layer)
+storage/vectors/faiss_index.bin
+storage/vectors/job_ids.json
+storage/documents/jobs.json
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+*.swp
+*.swo
