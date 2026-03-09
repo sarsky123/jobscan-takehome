@@ -8,6 +8,7 @@ venv/
 .venv/
 .venv-ingestion/
 env/
+.env/
 .env.local
 *.egg-info/
 .eggs/
