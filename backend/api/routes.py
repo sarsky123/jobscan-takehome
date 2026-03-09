@@ -5,6 +5,7 @@ from typing import List
 from fastapi import APIRouter, HTTPException, Request
 from openai import OpenAIError
 
+from backend.core.rate_limit import limiter
 from backend.models.schemas import JobResponse, RecommendationRequest
 from backend.services.recommendation import get_recommendations
 
@@ -13,11 +14,13 @@ router = APIRouter()
 
 
 @router.get("/health")
-async def health() -> dict:
+@limiter.limit("30/minute")
+async def health(request: Request) -> dict:
     return {"status": "ok"}
 
 
 @router.post("/recommendations", response_model=List[JobResponse])
+@limiter.limit("30/minute")
 async def recommendations_endpoint(
     request: Request,
     body: RecommendationRequest,
