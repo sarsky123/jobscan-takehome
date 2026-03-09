@@ -1,0 +1,38 @@
+.job-card {
+  padding: 1rem 1.25rem;
+  margin: 0;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.job-card-header {
+  margin-bottom: 0.5rem;
+}
+
+.job-card-title {
+  margin: 0 0 0.25rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.job-card-company {
+  margin: 0 0 0.25rem;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.job-card-score {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #0066cc;
+}
+
+.job-card-description {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #333;
+}
