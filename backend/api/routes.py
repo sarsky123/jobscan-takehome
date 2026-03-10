@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import logging
 from typing import List
 
 from fastapi import APIRouter, HTTPException, Request
 from openai import OpenAIError
 
 from backend.core.rate_limit import limiter
+
+logger = logging.getLogger(__name__)
 from backend.models.schemas import JobResponse, RecommendationRequest
 from backend.services.recommendation import get_recommendations
 
@@ -36,5 +39,6 @@ async def recommendations_endpoint(
             vector_store=vector_store,
         )
     except OpenAIError as exc:
+        logger.error("OpenAI error in /recommendations: %s", exc, exc_info=True)
         raise HTTPException(status_code=502, detail="Upstream OpenAI error") from exc
 
