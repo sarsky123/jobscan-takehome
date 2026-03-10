@@ -1,0 +1,27 @@
+# Render Blueprint: backend (Web Service) + frontend (Static Site).
+# Feed must be in repo at storage/feed/ (or set JOBS_INPUT_DIR). After deploy,
+# set OPENAI_API_KEY (sync: false), BACKEND_CORS_ORIGINS (frontend URL), and
+# VITE_API_URL (backend URL) in the dashboard.
+
+services:
+  - type: web
+    runtime: python
+    name: jobscan-api
+    buildCommand: pip install -r backend/requirements.txt && pip install -r ingestion/requirements.txt && python -m ingestion
+    startCommand: python -m backend.run
+    healthCheckPath: /health
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: BACKEND_CORS_ORIGINS
+        sync: false
+
+  - type: web
+    runtime: static
+    name: jobscan-frontend
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false
