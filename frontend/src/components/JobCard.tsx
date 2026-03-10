@@ -1,11 +1,12 @@
 import type { JobResponse } from "../types";
+import { useId, useMemo, useState } from "react";
 import "./JobCard.css";
 
 const DESCRIPTION_MAX_LENGTH = 200;
 
-function truncateDescription(description: string): string {
+function getDescriptionPreview(description: string): string {
   if (description.length <= DESCRIPTION_MAX_LENGTH) return description;
-  return description.slice(0, DESCRIPTION_MAX_LENGTH) + "...";
+  return description.slice(0, DESCRIPTION_MAX_LENGTH).trimEnd() + "…";
 }
 
 export function JobCard({ job }: { job: JobResponse }) {
@@ -13,7 +14,14 @@ export function JobCard({ job }: { job: JobResponse }) {
   const title = metadata.title ?? "";
   const company = metadata.company ?? "";
   const description = metadata.description ?? "";
-  const displayDescription = truncateDescription(description);
+  const previewDescription = getDescriptionPreview(description);
+  const isTruncatable = description.length > DESCRIPTION_MAX_LENGTH;
+  const [isExpanded, setIsExpanded] = useState(false);
+  const reactId = useId();
+  const descriptionId = useMemo(
+    () => `job-desc-${id || reactId}`,
+    [id, reactId]
+  );
   const scorePercent = (score * 100).toFixed(2);
 
   return (
@@ -23,8 +31,23 @@ export function JobCard({ job }: { job: JobResponse }) {
         {company && <p className="job-card-company">{company}</p>}
         <p className="job-card-score">{scorePercent}% Match</p>
       </header>
-      {displayDescription && (
-        <p className="job-card-description">{displayDescription}</p>
+      {description && (
+        <div className="job-card-description">
+          <p id={descriptionId} className="job-card-description-text">
+            {isExpanded || !isTruncatable ? description : previewDescription}
+          </p>
+          {isTruncatable && (
+            <button
+              type="button"
+              className="job-card-toggle"
+              aria-expanded={isExpanded}
+              aria-controls={descriptionId}
+              onClick={() => setIsExpanded((v) => !v)}
+            >
+              {isExpanded ? "Show less" : "Show more"}
+            </button>
+          )}
+        </div>
       )}
     </article>
   );
