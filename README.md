@@ -24,6 +24,8 @@ Do not commit `.env`; it may contain secrets. Copy `.env.example` to `.env` and 
 | | `JOB_IDS_PATH` | `storage/vectors/job_ids.json` | Output job IDs list path |
 | | `DOCUMENTS_PATH` | `storage/documents/jobs.json` | Output documents path |
 | | `OPENAI_API_KEY` | — | **Required** for ingestion (embedding calls) |
+| **Render** | `BACKEND_CORS_ORIGINS` | — | Comma-separated extra CORS origins (e.g. frontend URL) |
+| | `VITE_API_URL` | — | Backend public URL (set at build time for static site) |
 
 Example for custom storage paths (ingestion):
 
@@ -120,4 +122,25 @@ For large corpora (e.g. 10k–1M jobs), the current in-memory FAISS and single-r
 - **Missing `storage/vectors/faiss_index.bin` or `storage/documents/jobs.json`** — Run ingestion once: `OPENAI_API_KEY=your_key python -m ingestion`.
 - **502 or "Upstream OpenAI error"** — Check `OPENAI_API_KEY` (or `BACKEND_OPENAI_API_KEY`) and network; possible rate limit from OpenAI.
 - **429 from API** — Client rate limit (30/min per IP); back off or adjust rate limit in backend config.
-- **CORS errors in browser** — Backend allows `http://localhost:5173` and `http://127.0.0.1:5173`. If using another origin (e.g. deployed frontend), add it to `CORS_ORIGINS` in `backend/main.py`.
+- **CORS errors in browser** — Backend allows `http://localhost:5173` and `http://127.0.0.1:5173`. For a deployed frontend, set `BACKEND_CORS_ORIGINS` to the frontend URL (e.g. `https://your-frontend.onrender.com`).
+
+## Deployment (Render)
+
+You can deploy the backend as a **Web Service** and the frontend as a **Static Site** on [Render](https://render.com). The app binds to `PORT` (default 10000 on Render) and `0.0.0.0`.
+
+**Backend (Web Service)**
+
+- **Build command:** `pip install -r backend/requirements.txt && pip install -r ingestion/requirements.txt && python -m ingestion`  
+  Build-time ingestion requires job feed in the repo: commit JSON files under `storage/feed/`, or set `JOBS_INPUT_DIR` to another path.
+- **Start command:** `python -m backend.run` (listens on `0.0.0.0` and `PORT`).
+- **Environment variables:** Set `OPENAI_API_KEY` (required for ingestion at build time). After the frontend is deployed, set `BACKEND_CORS_ORIGINS` to the frontend URL (e.g. `https://your-frontend.onrender.com`).
+- **Health check path:** `/health` (optional).
+
+**Frontend (Static Site)**
+
+- **Root directory:** `frontend`.
+- **Build command:** `npm install && npm run build`.
+- **Publish directory:** `dist`.
+- **Environment variables:** Set `VITE_API_URL` to the backend’s public URL at build time (e.g. `https://your-backend.onrender.com`, no trailing slash).
+
+**Order:** Deploy the backend first, then set `VITE_API_URL` on the frontend and `BACKEND_CORS_ORIGINS` on the backend to the two service URLs. Alternatively, use the [render.yaml](render.yaml) Blueprint (New → Blueprint), then fill in `OPENAI_API_KEY`, `BACKEND_CORS_ORIGINS`, and `VITE_API_URL` in the dashboard.

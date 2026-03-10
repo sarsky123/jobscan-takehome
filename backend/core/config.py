@@ -35,6 +35,12 @@ class Settings(BaseSettings):
         description="Optional OpenAI API key override; if unset, the OpenAI client uses its defaults.",
     )
 
+    # Comma-separated list of extra CORS origins (e.g. deployed frontend URL on Render).
+    cors_origins: str = Field(
+        default="",
+        description="Additional CORS allow origins; comma-separated. Localhost origins are always included.",
+    )
+
     model_config = {
         "env_prefix": "BACKEND_",
         "extra": "ignore",

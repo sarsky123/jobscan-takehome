@@ -3,7 +3,9 @@ import { JobCard } from "./components/JobCard";
 import type { JobResponse } from "./types";
 import "./App.css";
 
-const API_URL = "http://localhost:8000/recommendations";
+const API_URL = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL}/recommendations`
+  : "http://localhost:8000/recommendations";
 const MIN_RESUME_LENGTH = 10;
 
 export default function App() {
