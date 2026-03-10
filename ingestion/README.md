@@ -1,6 +1,6 @@
 # Ingestion Service
 
-Offline ingestion: load job JSONs from storage, embed via OpenAI, L2-normalize, build FAISS index, persist. Runs as an isolated service (`python -m ingestion`).
+Offline ingestion: load job JSONs from storage, embed via OpenAI, L2-normalize, build FAISS index, persist. Runs as an isolated service (`python -m ingestion`). Environment variables (`JOBS_INPUT_DIR`, `FAISS_INDEX_PATH`, `JOB_IDS_PATH`, `DOCUMENTS_PATH`, `OPENAI_API_KEY`) are documented in the [repo root README](../README.md#configuration).
 
 ---
 

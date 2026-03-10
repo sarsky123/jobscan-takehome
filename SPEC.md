@@ -12,7 +12,7 @@ Minimal, embedding-based resume-to-job recommendation system. Small corpus (200�
 |--------|---------|
 | Backend | Python 3.11+, FastAPI, Uvicorn |
 | AI/ML   | OpenAI `text-embedding-3-small`, NumPy, FAISS (`faiss-cpu`) |
-| Frontend | Vanilla HTML/CSS/JS only (no frameworks) |
+| Frontend | React, Vite, TypeScript |
 
 ---
 
@@ -49,25 +49,25 @@ Isolated service in **`ingestion/`** so it can be scaled independently (own deps
 
 ---
 
-### 2. Backend API — **Planned**
+### 2. Backend API — **Implemented**
 
 | Item | Status | Notes |
 |------|--------|------|
-| **Server** | Planned | FastAPI app, Uvicorn |
-| **Load at startup** | Planned | Read `storage/vectors/faiss_index.bin`, `storage/vectors/job_ids.json`, and `storage/documents/jobs.json` into memory |
-| **Resume endpoint** | Planned | Accept resume text (or file); truncate long input; embed via OpenAI; L2-normalize query vector; FAISS search (IndexFlatIP) -> indices -> job_ids -> fetch job payloads from documents |
-| **Validation** | Planned | Pydantic request/response models |
-| **Retries** | Planned | Same tenacity pattern for embedding call |
+| **Server** | Done | FastAPI app, Uvicorn |
+| **Load at startup** | Done | Read `storage/vectors/faiss_index.bin`, `storage/vectors/job_ids.json`, and `storage/documents/jobs.json` into memory |
+| **Resume endpoint** | Done | Accept resume text; truncate long input; embed via OpenAI; L2-normalize query vector; FAISS search (IndexFlatIP) -> indices -> job_ids -> fetch job payloads from documents |
+| **Validation** | Done | Pydantic request/response models |
+| **Retries** | Done | Tenacity pattern for embedding call |
 
 ---
 
-### 3. Frontend — **Planned**
+### 3. Frontend — **Implemented**
 
 | Item | Status | Notes |
 |------|--------|------|
-| **Stack** | Planned | Vanilla HTML/CSS/JS only |
-| **UI** | Planned | Input for resume text (or paste); button to get recommendations; list/cards of recommended jobs (title, company, snippet, link if available) |
-| **Calls** | Planned | `fetch()` to backend resume endpoint; display results |
+| **Stack** | Done | React, Vite, TypeScript |
+| **UI** | Done | Input for resume text (or paste); button to get recommendations; list/cards of recommended jobs (title, company, snippet, link if available) |
+| **Calls** | Done | `fetch()` to backend resume endpoint; display results |
 
 ---
 
@@ -122,10 +122,11 @@ export OPENAI_API_KEY='your-key'
 # export DOCUMENTS_PATH=/data/documents/jobs.json
 .venv-ingestion/bin/python -m ingestion
 
-# ---- API (when implemented) ----
+# ---- API ----
 .venv/bin/uvicorn backend.main:app --reload
 
-# Frontend: static files served by backend or open frontend/index.html
+# Frontend (Vite dev server)
+cd frontend && npm install && npm run dev
 ```
 
 ---
@@ -135,3 +136,4 @@ export OPENAI_API_KEY='your-key'
 - **Storage layer:** Added `storage/` with `feed/`, `vectors/`, and `documents/` to mimic future S3 + Vector DB + Document DB segregation.
 - **Ingestion isolated:** Kept ingestion as a standalone service; removed backend ingestion wrapper/scripts.
 - **Spec created:** Ingestion implemented; API and frontend planned and recorded here.
+- **Stack update:** Frontend implemented with React + Vite + TypeScript (spec updated from vanilla HTML/CSS/JS). Backend API marked implemented.
