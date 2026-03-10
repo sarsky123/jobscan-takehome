@@ -21,12 +21,24 @@ def build_and_save(
     index.add(vectors)
 
     # Vector store should only contain vectors + a lightweight ID mapping.
+    # Persist only lightweight document metadata to keep memory low at query time.
     job_ids: list[str] = []
     documents: dict[str, dict] = {}
     for i, job in enumerate(jobs):
         job_id = job.get("id") or f"_{i}"
         job_ids.append(job_id)
-        documents[job_id] = job
+        title = job.get("title") or job.get("title_raw") or ""
+        company = job.get("organization") or job.get("company") or ""
+        description = job.get("description_text") or job.get("description") or ""
+        # Keep descriptions compact so the backend can load documents on small instances (e.g. 512Mi).
+        if len(description) > 2_000:
+            description = description[:2_000] + "…"
+        documents[job_id] = {
+            "title": title,
+            "organization": company,
+            "company": company,
+            "description": description,
+        }
 
     faiss_index_path.parent.mkdir(parents=True, exist_ok=True)
     job_ids_path.parent.mkdir(parents=True, exist_ok=True)

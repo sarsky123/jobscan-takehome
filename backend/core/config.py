@@ -25,7 +25,7 @@ class Settings(BaseSettings):
         description="Path to JSON list mapping FAISS row index -> job_id.",
     )
     documents_path: Path = Field(
-        default=_default_documents / "jobs.json",
+        default=_default_documents / "jobs_compact.json",
         description="Path to JSON mapping job_id -> full job document.",
     )
 

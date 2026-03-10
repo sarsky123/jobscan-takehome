@@ -26,7 +26,7 @@ def get_config() -> dict:
     )
     job_ids_path = _str_path(os.environ.get("JOB_IDS_PATH")) or (_default_vectors / "job_ids.json")
     documents_path = _str_path(os.environ.get("DOCUMENTS_PATH")) or (
-        _default_documents / "jobs.json"
+        _default_documents / "jobs_compact.json"
     )
 
     return {

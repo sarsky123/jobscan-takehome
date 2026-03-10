@@ -50,7 +50,6 @@ class _EmbeddingLRUCache:
 _embed_cache = _EmbeddingLRUCache(maxsize=EMBED_CACHE_MAXSIZE)
 _embed_cache_lock = asyncio.Lock()
 
-
 def _embed_cache_key(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 

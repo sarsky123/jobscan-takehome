@@ -13,19 +13,19 @@ Minimal, embedding-based resume-to-job recommendation app: backend API (FastAPI)
 
 Do not commit `.env`; it may contain secrets. Copy `.env.example` to `.env` and fill in values. The app reads from the environment (or `.env` at repo root when using a loader that supports it).
 
-| Variable | Default | Notes |
-|----------|---------|--------|
-| **Backend** | `BACKEND_FAISS_INDEX_PATH` | `storage/vectors/faiss_index.bin` | Path to FAISS index file |
-| | `BACKEND_JOB_IDS_PATH` | `storage/vectors/job_ids.json` | FAISS row index → job_id |
-| | `BACKEND_DOCUMENTS_PATH` | `storage/documents/jobs.json` | job_id → job document |
-| | `BACKEND_OPENAI_API_KEY` | — | Optional override; else `OPENAI_API_KEY` |
-| **Ingestion** | `JOBS_INPUT_DIR` | `storage/feed/` | Directory of job JSON files |
-| | `FAISS_INDEX_PATH` | `storage/vectors/faiss_index.bin` | Output FAISS index path |
-| | `JOB_IDS_PATH` | `storage/vectors/job_ids.json` | Output job IDs list path |
-| | `DOCUMENTS_PATH` | `storage/documents/jobs.json` | Output documents path |
-| | `OPENAI_API_KEY` | — | **Required** for ingestion (embedding calls) |
-| **Render** | `BACKEND_CORS_ORIGINS` | — | Comma-separated extra CORS origins (e.g. frontend URL) |
-| | `VITE_API_URL` | — | Backend public URL (set at build time for static site) |
+| Section | Variable | Default | Notes |
+| --- | --- | --- | --- |
+| Backend | `BACKEND_FAISS_INDEX_PATH` | `storage/vectors/faiss_index.bin` | Path to FAISS index file |
+| Backend | `BACKEND_JOB_IDS_PATH` | `storage/vectors/job_ids.json` | FAISS row index → job_id |
+| Backend | `BACKEND_DOCUMENTS_PATH` | `storage/documents/jobs_compact.json` | job_id → job metadata (compact) |
+| Backend | `BACKEND_OPENAI_API_KEY` | — | Optional override; else `OPENAI_API_KEY` |
+| Ingestion | `JOBS_INPUT_DIR` | `storage/feed/` | Directory of job JSON files |
+| Ingestion | `FAISS_INDEX_PATH` | `storage/vectors/faiss_index.bin` | Output FAISS index path |
+| Ingestion | `JOB_IDS_PATH` | `storage/vectors/job_ids.json` | Output job IDs list path |
+| Ingestion | `DOCUMENTS_PATH` | `storage/documents/jobs_compact.json` | Output documents path (compact) |
+| Ingestion | `OPENAI_API_KEY` | — | Required for ingestion (embedding calls) |
+| Render | `BACKEND_CORS_ORIGINS` | — | Comma-separated extra CORS origins (e.g. frontend URL) |
+| Render | `VITE_API_URL` | — | Backend public URL (set at build time for static site) |
 
 Example for custom storage paths (ingestion):
 
@@ -33,7 +33,7 @@ Example for custom storage paths (ingestion):
 export JOBS_INPUT_DIR=/data/feed
 export FAISS_INDEX_PATH=/data/vectors/faiss_index.bin
 export JOB_IDS_PATH=/data/vectors/job_ids.json
-export DOCUMENTS_PATH=/data/documents/jobs.json
+export DOCUMENTS_PATH=/data/documents/jobs_compact.json
 ```
 
 ## Run backend only
@@ -47,7 +47,7 @@ pip install -r backend/requirements.txt
 uvicorn backend.main:app --reload
 ```
 
-API: **http://localhost:8000**
+API: `http://localhost:8000`
 
 ## Run frontend only
 
@@ -57,7 +57,7 @@ npm install
 npm run dev
 ```
 
-App: **http://localhost:5173** (requires the backend to be running for recommendations).
+App: `http://localhost:5173` (requires the backend to be running for recommendations).
 
 ## Run both (backend + frontend)
 
@@ -120,6 +120,7 @@ For large corpora (e.g. 10k–1M jobs), the current in-memory FAISS and single-r
 ## Troubleshooting
 
 - **Missing `storage/vectors/faiss_index.bin` or `storage/documents/jobs.json`** — Run ingestion once: `OPENAI_API_KEY=your_key python -m ingestion`.
+- **Missing `storage/documents/jobs_compact.json`** — Build compact docs from an existing `jobs.json`: `python -m ingestion.compact_documents` (recommended for large feeds to avoid re-embedding).
 - **502 or "Upstream OpenAI error"** — Check `OPENAI_API_KEY` (or `BACKEND_OPENAI_API_KEY`) and network; possible rate limit from OpenAI.
 - **429 from API** — Client rate limit (30/min per IP); back off or adjust rate limit in backend config.
 - **CORS errors in browser** — Backend allows `http://localhost:5173` and `http://127.0.0.1:5173`. For a deployed frontend, set `BACKEND_CORS_ORIGINS` to the frontend URL (e.g. `https://your-frontend.onrender.com`).
@@ -128,15 +129,15 @@ For large corpora (e.g. 10k–1M jobs), the current in-memory FAISS and single-r
 
 You can deploy the backend as a **Web Service** and the frontend as a **Static Site** on [Render](https://render.com). The app binds to `PORT` (default 10000 on Render) and `0.0.0.0`.
 
-**Backend (Web Service)**
+### Backend (Web Service)
 
-- **Pre-built index:** For Render (especially free-tier 512MB), the FAISS index must be pre-built and committed. Do not run ingestion on Render’s build environment. Run ingestion locally: `OPENAI_API_KEY=your_key python -m ingestion`, then commit `storage/vectors/` and `storage/documents/jobs.json`. When you change job data in `storage/feed/`, re-run ingestion and commit the updated artifacts.
+- **Pre-built index:** For Render (especially free-tier 512MB), the FAISS index must be pre-built and committed. Also commit the compact documents file to avoid startup OOM. Do not run ingestion on Render’s build environment. Run ingestion locally: `python -m ingestion` (uses repo-root `.env` if present), then commit `storage/vectors/` and `storage/documents/jobs_compact.json`. For large feeds, you can create `jobs_compact.json` from an existing `jobs.json` without re-embedding: `python -m ingestion.compact_documents`.
 - **Build command:** `pip install --no-cache-dir -r backend/requirements.txt`
 - **Start command:** `python -m backend.run` (listens on `0.0.0.0` and `PORT`).
 - **Environment variables:** Set `OPENAI_API_KEY` (required for recommendation embedding at runtime). After the frontend is deployed, set `BACKEND_CORS_ORIGINS` to the frontend URL (e.g. `https://your-frontend.onrender.com`).
 - **Health check path:** `/health` (optional).
 
-**Frontend (Static Site)**
+### Frontend (Static Site)
 
 - **Root directory:** `frontend`.
 - **Build command:** `npm install && npm run build`.

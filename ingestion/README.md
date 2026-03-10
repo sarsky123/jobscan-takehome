@@ -12,9 +12,9 @@ This repo uses a **local storage layout that mimics the future scaled architectu
 - **Vector store (future: Pinecone/Milvus):** `storage/vectors/`
   - `faiss_index.bin` — FAISS `IndexFlatIP` over L2-normalized embeddings (cosine similarity).
   - `job_ids.json` — FAISS row index → `job_id` mapping (lightweight).
-- **Document store (future: DynamoDB/MongoDB):** `storage/documents/jobs.json` contains `{job_id: job_object}` for full payload retrieval.
+- **Document store (future: DynamoDB/MongoDB):** `storage/documents/jobs_compact.json` contains `{job_id: {title, company, description}}` for lightweight retrieval in the demo.
 
-At query time (in the future API): embed resume → FAISS search → indices → `job_ids.json` → fetch job payloads from `documents/jobs.json`.
+At query time (in the future API): embed resume → FAISS search → indices → `job_ids.json` → fetch lightweight payloads from `documents/jobs_compact.json`.
 
 ---
 

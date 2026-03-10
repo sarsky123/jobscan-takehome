@@ -34,10 +34,15 @@ def _cors_origins() -> list[str]:
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
+    documents_path = settings.documents_path
+    if not documents_path.is_file():
+        legacy = documents_path.parent / "jobs.json"
+        if legacy.is_file():
+            documents_path = legacy
     app.state.vector_store = JobVectorStore(
         faiss_index_path=settings.faiss_index_path,
         job_ids_path=settings.job_ids_path,
-        documents_path=settings.documents_path,
+        documents_path=documents_path,
     )
     try:
         yield
