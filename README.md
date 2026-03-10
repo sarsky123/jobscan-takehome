@@ -130,10 +130,10 @@ You can deploy the backend as a **Web Service** and the frontend as a **Static S
 
 **Backend (Web Service)**
 
-- **Build command:** `pip install -r backend/requirements.txt && pip install -r ingestion/requirements.txt && python -m ingestion`  
-  Build-time ingestion requires job feed in the repo: commit JSON files under `storage/feed/`, or set `JOBS_INPUT_DIR` to another path.
+- **Pre-built index:** For Render (especially free-tier 512MB), the FAISS index must be pre-built and committed. Do not run ingestion on Render’s build environment. Run ingestion locally: `OPENAI_API_KEY=your_key python -m ingestion`, then commit `storage/vectors/` and `storage/documents/jobs.json`. When you change job data in `storage/feed/`, re-run ingestion and commit the updated artifacts.
+- **Build command:** `pip install --no-cache-dir -r backend/requirements.txt`
 - **Start command:** `python -m backend.run` (listens on `0.0.0.0` and `PORT`).
-- **Environment variables:** Set `OPENAI_API_KEY` (required for ingestion at build time). After the frontend is deployed, set `BACKEND_CORS_ORIGINS` to the frontend URL (e.g. `https://your-frontend.onrender.com`).
+- **Environment variables:** Set `OPENAI_API_KEY` (required for recommendation embedding at runtime). After the frontend is deployed, set `BACKEND_CORS_ORIGINS` to the frontend URL (e.g. `https://your-frontend.onrender.com`).
 - **Health check path:** `/health` (optional).
 
 **Frontend (Static Site)**

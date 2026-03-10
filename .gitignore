@@ -16,11 +16,6 @@ env/
 dist/
 build/
 
-# Generated ingestion outputs (storage layer)
-storage/vectors/faiss_index.bin
-storage/vectors/job_ids.json
-storage/documents/jobs.json
-
 # Frontend
 frontend/node_modules/
 frontend/dist/
