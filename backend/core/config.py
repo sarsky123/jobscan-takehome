@@ -38,6 +38,7 @@ class Settings(BaseSettings):
     model_config = {
         "env_prefix": "BACKEND_",
         "extra": "ignore",
+        "env_file": _default_root / ".env",
     }
 
 
