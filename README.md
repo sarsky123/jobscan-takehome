@@ -106,12 +106,41 @@ pytest
 
 Tests cover: L2 normalization and truncation in the recommendation service, FAISS index ↔ job_id mapping and search in the vector store, and API validation and error handling.
 
-## Evaluation plan
+## Quality Evaluation
 
-- **Labeled set:** Build a small set of (resume, set of relevant job_ids), e.g. 20–50 resumes with 1–5 relevant jobs each.
-- **Metrics:** Recall@K and MRR@K for K = 5, 10, 20; optional human rubric (relevance, seniority/domain match) on a sample.
-- **Baselines:** Compare embedding cosine vs a simple keyword baseline (e.g. BM25-lite); ablation without L2 normalization to confirm correctness.
-- **Cost/latency:** Track embedding call latency and token/character usage under the current truncation policy.
+**How would you evaluate recommendation quality?**
+
+To ensure the recommendation system is both algorithmically accurate and valuable to users, I would evaluate quality across three dimensions:
+
+**Engineering Sanity (Consistency & Determinism):** As a baseline, the system must be strictly deterministic. I would implement automated regression tests to ensure that feeding the exact same resume text consistently yields the exact same ordering of job results and similarity scores. This validates that the vector L2 normalization and ID mappings are stable.
+
+**Offline Evaluation (Benchmark Testing):** Before deployment, I would build a "Golden Dataset"—a benchmark set of curated resumes categorized by specific dimensions (e.g., Seniority, Frontend vs. Backend, Industry). By running these through the system, we can measure Information Retrieval (IR) metrics like Recall@K and NDCG (Normalized Discounted Cumulative Gain) to objectively score how well the model differentiates between specialized skill sets and seniorities.
+
+**Online Evaluation (User Interaction & Product Metrics):** Algorithmic accuracy must translate to user engagement. Post-deployment, I would use A/B testing to track real-world interaction metrics. The primary indicators of success would be the Click-Through Rate (CTR) on the recommended job cards, and ultimately, the Conversion Rate (how many users actually hit "Apply" after clicking).
+
+## Improving Accuracy
+
+**How would you further improve accuracy? Name 3 improvements and describe when you would use each.**
+
+To move beyond the limitations of a naive dense vector index, I would implement the following concrete architectural upgrades:
+
+### Query Expansion via LLM (HyDE - Hypothetical Document Embeddings)
+
+**What:** Instead of directly embedding the user's raw resume, the system first passes the resume to a lightweight LLM with a prompt to generate a "perfect hypothetical job description" for this candidate. We then embed this hypothetical job description and use it to search the actual job corpus.
+
+**When to use:** When there is a severe "Vocabulary Mismatch." For instance, a candidate might write "built a website," while the HR job description asks for "frontend web architecture experience." Expanding the query bridges the gap between candidate phrasing and standard industry jargon, drastically improving semantic recall.
+
+### Metadata Pre-filtering (Hard-filtering)
+
+**What:** Extract key structured data (e.g., years of experience required, location, remote status) from job descriptions during ingestion and store them as payload metadata in the vector database.
+
+**When to use:** When there are absolute deal-breakers in the job requirements. Filtering the dataset with a SQL-like query (e.g., experience <= 5 AND is_remote = true) before performing the cosine similarity search prevents the system from recommending highly semantic-matched but fundamentally unqualified roles (like a Director role for a Junior candidate).
+
+### Structural Chunking & Multi-Vector Matching
+
+**What:** Instead of embedding an entire resume or job description into a single dense vector (which dilutes critical keywords and averages out the semantic meaning), I would chunk the documents into distinct structural sections (e.g., "Skills", "Experience", "Education"). The system would then generate separate embeddings for each chunk and perform a multi-vector weighted search (e.g., heavily weighting the match between Resume_Skills and JD_Requirements).
+
+**When to use:** When the corpus contains very long, multi-faceted documents. This prevents "noise matching"—for example, ensuring a candidate's hobby mentioned in the resume doesn't falsely trigger a highly-scored match with an unrelated job's core requirement. It maintains the signal-to-noise ratio in high-dimensional space.
 
 ## Scaling
 
