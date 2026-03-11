@@ -124,11 +124,23 @@ To ensure the recommendation system is both algorithmically accurate and valuabl
 
 To move beyond the limitations of a naive dense vector index, I would implement the following concrete architectural upgrades:
 
-### Query Expansion via LLM (HyDE - Hypothetical Document Embeddings)
+### Structured Query Expansion & Vocabulary Standardization (via LLM)
 
-**What:** Instead of directly embedding the user's raw resume, the system first passes the resume to a lightweight LLM with a prompt to generate a "perfect hypothetical job description" for this candidate. We then embed this hypothetical job description and use it to search the actual job corpus.
+**What:** Instead of directly embedding a user's raw, unstructured resume, I would introduce a lightweight LLM pre-processing step (e.g., using gpt-4o-mini). By applying a strict prompt, the LLM simultaneously performs two tasks in a single API call:
 
-**When to use:** When there is a severe "Vocabulary Mismatch." For instance, a candidate might write "built a website," while the HR job description asks for "frontend web architecture experience." Expanding the query bridges the gap between candidate phrasing and standard industry jargon, drastically improving semantic recall.
+- **Query Expansion (HyDE):** It generates a "perfect-match hypothetical job description" based on the resume.
+- **Vocabulary Standardization:** It forces all informal phrasing into a standardized industry taxonomy and a fixed structural format.
+
+We then embed this clean, standardized output to search the vector database.
+
+**Example:**
+
+- **Raw Resume Input:** "I do UI coding, made some websites with React, and sometimes manage our k8s stuff."
+- **LLM Standardized Output:** "Role: Frontend Engineer | Core Skills: React.js, Kubernetes | Key Responsibilities: Develop scalable user interfaces, orchestrate containerized deployments."
+
+By embedding the latter, the query vector perfectly aligns with the formal, professional language used in the actual job descriptions stored in our database.
+
+**When to use:** When dealing with high variance in user inputs and severe "Vocabulary Mismatch" (i.e., the semantic gap between casual candidate phrasing and formal HR jargon). This ensures the signal-to-noise ratio remains high before the data even enters the vector space.
 
 ### Metadata Pre-filtering (Hard-filtering)
 
