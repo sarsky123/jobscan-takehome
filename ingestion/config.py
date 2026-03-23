@@ -41,4 +41,3 @@ EMBEDDING_MODEL = "text-embedding-3-small"
 EMBEDDING_DIM = 1536
 BATCH_SIZE = 100
 MAX_TEXT_CHARS = 30_000
-JOB_MAPPING_FILENAME = "job_mapping.json"  # legacy; no longer written by the service

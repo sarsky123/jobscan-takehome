@@ -4,16 +4,11 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from ingestion.config import JOB_MAPPING_FILENAME, MAX_TEXT_CHARS
+from ingestion.config import MAX_TEXT_CHARS
 
 
 def discover_job_files(data_dir: Path) -> list[Path]:
-    out: list[Path] = []
-    for p in sorted(data_dir.glob("*.json")):
-        if p.name == JOB_MAPPING_FILENAME:
-            continue
-        out.append(p)
-    return out
+    return sorted(data_dir.glob("*.json"))
 
 
 def load_jobs_from_path(path: Path) -> list[dict]:
